@@ -49,7 +49,6 @@ class Scraper {
    * Run the scrape job. This is the main entry point
    */
   public function run() {
-    $start = time();
     try {
       $this->_parseArguments();
     } catch (\Exception $e) {

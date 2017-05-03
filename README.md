@@ -19,3 +19,15 @@ Once composer is installed, execute the following commands.
 ```
 
 You can replace output.json with the file of your choice.
+
+
+## Python
+
+This version requires BeautifulSoup to operate. You can find information on it here: https://www.crummy.com/software/BeautifulSoup/
+
+```
+# cd asn-scraper/python
+# scraper output.json
+```
+
+You can replace output.json with the file of your choice.

@@ -1,0 +1,94 @@
+#!/usr/bin/env python
+
+import sys
+import re
+import urllib2
+import bs4
+import json
+
+OUTPUT_FILE = None
+
+def main():
+    output = {}
+    parse_args()
+
+    print 'Generating ASN List...(this may take a while)'
+    for country in get_countries():
+        asn = get_asn(country)
+        output = merge_dicts(output, asn)
+
+    print 'Complete. Writing output file...'
+    write_file_contents(output)
+    print 'Complete. Please see contents in ' + OUTPUT_FILE.name
+    sys.exit(0)
+
+def get_countries():
+    output = []
+    soup = url_to_soup('http://bgp.he.net/report/world')
+    table = soup.find(id='table_countries')
+    for row in table.tbody.find_all('tr'):
+        output.append(row.find_all('td')[1].get_text().strip())
+
+    return output
+
+def get_asn(code):
+    output = {}
+    soup = url_to_soup('http://bgp.he.net/country/' + code)
+    table = soup.find(id='asns')
+    if table:
+        for row in table.tbody.find_all('tr'):
+            tds = row.find_all('td')
+            asn = tds[0].get_text().strip()
+            asn_id = re.sub('\D', '', asn)
+            name = tds[1].get_text().strip()
+            adj_v4 = int(tds[2].get_text().strip().replace(',', ''))
+            route_v4 = int(tds[3].get_text().strip().replace(',', ''))
+            adj_v6 = int(tds[4].get_text().strip().replace(',', ''))
+            route_v6 = int(tds[5].get_text().strip().replace(',', ''))
+            output[asn_id] = {
+                'Asn': asn,
+                'Country': code,
+                'Name': name,
+                'Adjacencies v4': adj_v4,
+                'Routes v4': route_v4,
+                'Adjacencies v6': adj_v6,
+                'Routes v6': route_v6
+            }
+    return output
+
+def url_to_soup(url):
+    req = urllib2.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+    html = urllib2.urlopen(req).read()
+    soup = bs4.BeautifulSoup(html, 'lxml')
+    return soup
+
+def parse_args():
+    global OUTPUT_FILE
+
+    if len(sys.argv) != 2:
+        print 'Error: invalid arguments'
+        print usage()
+        sys.exit(1);
+
+    try:
+        fp = open(sys.argv[1], 'w')
+    except IOError:
+        print 'Error: destination file is not writable'
+        sys.exit(1)
+
+    OUTPUT_FILE = fp
+
+def write_file_contents(contents):
+    json.dump(contents, OUTPUT_FILE, indent=4)
+
+def merge_dicts(a, b):
+    c = a.copy()
+    c.update(b)
+    return c
+
+def usage():
+    return 'usage: ' + sys.argv[0] + ' <filename>'
+
+
+if __name__ == '__main__':
+    main()

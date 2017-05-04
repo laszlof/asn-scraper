@@ -8,6 +8,7 @@ import json
 
 OUTPUT_FILE = None
 
+# Main entry point
 def main():
     output = {}
     parse_args()
@@ -22,6 +23,7 @@ def main():
     print 'Complete. Please see contents in ' + OUTPUT_FILE.name
     sys.exit(0)
 
+# Get a list of countries
 def get_countries():
     output = []
     soup = url_to_soup('http://bgp.he.net/report/world')
@@ -31,6 +33,7 @@ def get_countries():
 
     return output
 
+# Get ASNs for a given country code
 def get_asn(code):
     output = {}
     soup = url_to_soup('http://bgp.he.net/country/' + code)
@@ -56,12 +59,14 @@ def get_asn(code):
             }
     return output
 
+# Generate BeautifulSoup object from URL
 def url_to_soup(url):
     req = urllib2.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
     html = urllib2.urlopen(req).read()
     soup = bs4.BeautifulSoup(html, 'lxml')
     return soup
 
+# Parse command line arguments
 def parse_args():
     global OUTPUT_FILE
 
@@ -78,14 +83,17 @@ def parse_args():
 
     OUTPUT_FILE = fp
 
+# Write JSON to output file
 def write_file_contents(contents):
     json.dump(contents, OUTPUT_FILE, indent=4)
 
+# Merge 2 dictionaries
 def merge_dicts(a, b):
     c = a.copy()
     c.update(b)
     return c
 
+# Print usage information
 def usage():
     return 'usage: ' + sys.argv[0] + ' <filename>'
 

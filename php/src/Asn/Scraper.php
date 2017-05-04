@@ -26,7 +26,7 @@ class Scraper {
    * Arguments passed to script
    * @var array
    */
-  private $_args = [];
+  private $_args = array();
 
   /**
    * Output file name
@@ -56,7 +56,7 @@ class Scraper {
       exit(1);
     }
 
-    $output = [];
+    $output = array();
 
     print "Generating ASN List...(this may take a while)\n";
     foreach ($this->_getCountries() as $country) {
